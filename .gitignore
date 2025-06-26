@@ -1,2 +1,5 @@
 /screenshots/*
 !/screenshots/dummy.txt
+
+/share/*
+!/share/dummy.txt
