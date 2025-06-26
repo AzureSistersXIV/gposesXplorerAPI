@@ -3,3 +3,5 @@
 
 /share/*
 !/share/dummy.txt
+
+/api/sfw.json
