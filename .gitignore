@@ -1,6 +1,9 @@
 /screenshots/*
 !/screenshots/dummy.txt
 
+/thumbnails/*
+!/thumbnails/dummy.txt
+
 /share/*
 !/share/dummy.txt
 

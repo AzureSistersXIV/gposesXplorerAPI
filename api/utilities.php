@@ -1,5 +1,7 @@
 <?php
 
+require_once "./thumbimage.class.php";
+
 // Helper function to scan and build folder structure
 function getFolders(string $screenshotsDir): array {
     // Get all directories in the screenshots directory, excluding '.' and '..'
@@ -68,6 +70,57 @@ function exploreFolder(string $folder): array {
         $scan($fullPath);
     }
     return $result;
+}
+
+/**
+ * Get the full paths for an screenshot and its thumbnail.
+ *
+ * @param string $screenshot The relative path to the screenshot.
+ * @return array An array containing the full paths to the screenshot and its thumbnail.
+ * @throws Exception If the screenshot link is not found.
+ */
+function getFullPaths(string $screenshot): array
+{
+    // Set error reporting settings
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', '/path/to/custom.log');
+
+    $host = "../";
+    $commPath = $screenshot;
+    $thumbPath = str_replace("screenshots/", "thumbnails/", $screenshot);
+
+    // Check if the screenshot file exists
+    if (!file_exists("../" . $commPath)) {
+        throw new Exception("screenshot link not found: {$commPath}");
+    }
+
+    $dirPath = "";
+    // Split the thumbnail path into directories
+    $words = explode("/", "../" . $thumbPath);
+    foreach ($words as $key => $word) {
+        $dirPath .= $word . ($key < count($words) - 1 ? "/" : "");
+        // Create the directory if it does not exist
+        if (!is_dir($dirPath) && $key < count($words) - 1) {
+            mkdir($dirPath, 0755, false);
+        }
+    }
+
+    // Check if the thumbnail file exists
+    if (!file_exists("../" . $thumbPath)) {
+        // Create the directory for the thumbnail if it does not exist
+        $temp = explode("/", $thumbPath);
+        unset($temp[count($temp) - 1]);
+        $temp = "../" . implode("/", $temp);
+        if (!is_dir($temp))
+            mkdir($temp, 0777, false);
+
+        // Create the thumbnail image
+        $objThumbImage = new ThumbImage($host . $commPath);
+        $objThumbImage->createThumb($host . $thumbPath, 250);
+    }
+
+    return ["{$host}{$commPath}", "{$host}{$thumbPath}"];
 }
 
 /**
