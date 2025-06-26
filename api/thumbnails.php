@@ -19,7 +19,13 @@ if (!$screenshot) {
 
     // Loop through each screenshot and get its full path
     foreach ($screenshots as $screenshot) {
-        $json[] = getFullPaths($screenshot);
+        try {
+            // If 'screenshot' is provided, get its full path
+            $json[] = getFullPaths($screenshot);
+        } catch (Throwable $e) {
+            // If an error occurs, return an error message
+            $json = ["error" => "Failed to retrieve screenshot: " . $e->getMessage()];
+        }
     }
 } else {
     try {
