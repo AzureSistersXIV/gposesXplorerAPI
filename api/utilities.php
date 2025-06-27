@@ -116,8 +116,8 @@ function getFullPaths(string $screenshot): array
             mkdir($temp, 0777, false);
 
         // Create the thumbnail image
-        $objThumbImage = new ThumbImage($host . $commPath);
-        $objThumbImage->createThumb($host . $thumbPath, 250);
+        $objThumbImage = new ThumbImage(`{$host}{$commPath}`);
+        $objThumbImage->createThumb(`{$host}{$thumbPath}`, 500);
     }
 
     return ["{$host}{$commPath}", "{$host}{$thumbPath}"];
