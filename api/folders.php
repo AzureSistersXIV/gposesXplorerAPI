@@ -1,4 +1,5 @@
 <?php
+
 // CORS headers must be at the TOP
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -7,20 +8,25 @@ header('Content-Type: application/json; charset=utf-8');
 // Include utility functions
 require_once "./utilities.php";
 
-// Load folder data from JSON file
-$folderData = json_decode(file_get_contents("sfw.json"), true);
+$sourceDir = getFormParameter('source');
 
-if (empty($folderData) || $folderData === null) {
-    $folderData = [];
+if(!$sourceDir) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Source directory is required.']);
+    exit;
 }
 
-// Filter folders based on the 'isNsfw' query parameter
-$folderData = array_filter($folderData, function($folder): bool{
-    return $folder === (!getQueryParameter("isNsfw") || getQueryParameter("isNsfw") !== "true");
+$dirPath = "../screenshots/{$sourceDir}";
+if (!is_dir($dirPath)) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Directory not found.']);
+    exit;
+}
+
+$folders = array_filter(scandir($dirPath), function($folder) use ($dirPath) {
+    return $folder !== '.' && $folder !== '..' && is_dir("{$dirPath}/{$folder}");
 });
 
-// Sort folders array naturally and case-insensitively
-ksort($folderData, SORT_NATURAL | SORT_FLAG_CASE);
+sort($folders, SORT_NATURAL | SORT_FLAG_CASE);
 
-// If folder data is already available, return it
-echo json_encode($folderData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+echo json_encode(['folders' => $folders]);
