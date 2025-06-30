@@ -18,7 +18,7 @@ if ($json === null) {
 }
 
 // Get the list of folders in the screenshots directory
-$repository = getFolders('../screenshots');
+$repository = getSources('../screenshots');
 
 $news = [];
 foreach ($repository as $folder) {
