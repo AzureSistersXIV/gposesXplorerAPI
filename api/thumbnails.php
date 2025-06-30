@@ -1,41 +1,44 @@
 <?php
-// CORS headers must be at the TOP
+
+// Set CORS headers to allow cross-origin requests and specify content type
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json; charset=utf-8');
 
-// Include utility functions
+// Include utility functions (e.g., getFormParameter)
 require_once "./utilities.php";
 
-// Get the 'screenshot' parameter from the form submission
-$screenshot = getFormParameter("screenshot");
+// Retrieve the 'source' parameter from the request (POST/GET)
+$sourceDir = getFormParameter('source');
 
-// Initialize an empty array to store the JSON response
-$json = [];
-
-if (!$screenshot) {
-    // If 'screenshot' is not provided, get the 'screenshots' parameter
-    $screenshots = getFormParameter("screenshots");
-
-    // Loop through each screenshot and get its full path
-    foreach ($screenshots as $screenshot) {
-        try {
-            // If 'screenshot' is provided, get its full path
-            $json[] = getFullPaths($screenshot);
-        } catch (Throwable $e) {
-            // If an error occurs, return an error message
-            $json = ["error" => "Failed to retrieve screenshot: " . $e->getMessage()];
-        }
-    }
-} else {
-    try {
-        // If 'screenshot' is provided, get its full path
-        $json[] = getFullPaths($screenshot);
-    } catch (Throwable $e) {
-        // If an error occurs, return an error message
-        $json = ["error" => "Failed to retrieve screenshot: " . $e->getMessage()];
-    }
+// If 'source' parameter is missing, return HTTP 400 with error message
+if(!$sourceDir) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Source directory is required.']);
+    exit;
 }
 
-// Encode the array to JSON format and output it
-echo json_encode($json);
+// Build the path to the target directory inside ../screenshots/
+$dirPath = "../screenshots/{$sourceDir}";
+
+// Check if the directory exists; if not, return HTTP 404 with error message
+if (!is_dir($dirPath)) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Directory not found.']);
+    exit;
+}
+
+// Scan the directory for files (thumbnails), filtering out '.' and '..' and directories
+$thumbnails = array_filter(
+    scandir($dirPath),
+    function($thumbnail) use ($dirPath) {
+        // Only include files, skip '.' and '..'
+        return $thumbnail !== '.' && $thumbnail !== '..' && !is_dir("{$dirPath}/{$thumbnail}");
+    }
+);
+
+// Sort the file names in a natural, case-insensitive order
+sort($thumbnails, SORT_NATURAL | SORT_FLAG_CASE);
+
+// Return the list of thumbnails as a JSON response
+echo json_encode(['thumbnails' => $thumbnails]);
