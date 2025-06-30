@@ -78,3 +78,89 @@ function getSources(string $screenshotsDir): array {
     }
     return $resultFolders;
 }
+
+function getFullPaths(string $screenshot): array
+{
+    // Set error reporting settings
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', '../logs/error.log');
+
+    $host = "../";
+    $screenPath = $screenshot;
+    $thumbPath = str_replace("screenshots/", "thumbnails/", $screenshot);
+
+    
+    if (!file_exists("../" . $screenPath)) {
+        throw new Exception(`Artwork link not found: {$screenPath}`);
+    }
+
+    $dirPath = "";
+    // Split the thumbnail path into directories
+    $words = explode("/", "../" . $thumbPath);
+    foreach ($words as $key => $word) {
+        $dirPath .= $word . ($key < count($words) - 1 ? "/" : "");
+        // Create the directory if it does not exist
+        if (!is_dir($dirPath) && $key < count($words) - 1) {
+            mkdir($dirPath, 0755, false);
+        }
+    }
+
+    // Check if the thumbnail file exists
+    if (!file_exists("../" . $thumbPath)) {
+        // Create the directory for the thumbnail if it does not exist
+        $temp = explode("/", $thumbPath);
+        unset($temp[count($temp) - 1]);
+        $temp = "../" . implode("/", $temp);
+        if (!is_dir($temp))
+            mkdir($temp, 0777, false);
+
+        // Create the thumbnail image
+        $objThumbImage = new ThumbImage($host . $screenPath);
+        $objThumbImage->createThumb($host . $thumbPath, 250);
+    }
+
+    return [$host . $screenPath, $host . $thumbPath];
+}
+
+function explorePath(string $path, bool $remove = false): array
+{
+    if (!is_dir($path)) {
+        throw new Exception("The path provided is not a directory: " . $path);
+    }
+
+    $explored = [];
+    // Get the list of files in the directory, excluding "." and ".."
+    $files = array_filter(@scandir($path), function ($file) {
+        return $file !== "." && $file !== "..";
+    });
+
+    // Files to remove.
+    $toRemove = ["desktop.ini", "Thumbs.db", "@eaDir"];
+
+    foreach ($files as $key => $file) {
+        // Check if the file should be removed
+        if (in_array($file, $toRemove) && $remove) {
+            if (is_dir($path . "/" . $file)) {
+                // Remove the directory and its contents
+                system('rm -rf -- ' . escapeshellarg($path . "/" . $file), $retval);
+            } else {
+                // Remove the file
+                unlink($path . "/" . $file);
+            }
+        } else {
+            // Get the file extension
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+            if (!empty($extension)) {
+                $explored[] = $path . "/" . $file;
+            } else {
+                // If the file has no extension, explore it as a directory
+                unset($files[$key]);
+                $explored = array_merge($explored, explorePath($path . "/" . $file, $remove));
+            }
+        }
+    }
+
+    return $explored;
+}

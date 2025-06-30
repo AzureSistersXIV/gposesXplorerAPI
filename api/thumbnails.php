@@ -12,7 +12,7 @@ require_once "./utilities.php";
 $sourceDir = getFormParameter('source');
 
 // If 'source' parameter is missing, return HTTP 400 with error message
-if(!$sourceDir) {
+if (!$sourceDir) {
     http_response_code(400);
     echo json_encode(['error' => 'Source directory is required.']);
     exit;
@@ -28,17 +28,29 @@ if (!is_dir($dirPath)) {
     exit;
 }
 
-// Scan the directory for files (thumbnails), filtering out '.' and '..' and directories
-$thumbnails = array_filter(
+$screenshots = array_filter(
     scandir($dirPath),
-    function($thumbnail) use ($dirPath) {
+    function ($screenshot) use ($dirPath) {
         // Only include files, skip '.' and '..'
-        return $thumbnail !== '.' && $thumbnail !== '..' && !is_dir("{$dirPath}/{$thumbnail}");
+        return $screenshot !== '.' && $screenshot !== '..' && !is_dir("{$dirPath}/{$screenshot}");
     }
 );
 
+$screenshots = array_map(
+    function ($screenshot) use ($dirPath) {
+        // Return the relative path of each screenshot
+        return substr($dirPath, 3) . "/{$screenshot}";
+    },
+    $screenshots
+);
+
+$json = [];
+foreach ($screenshots as $screen) {
+    $json[] = getFullPaths($screen);
+}
+
 // Sort the file names in a natural, case-insensitive order
-sort($thumbnails, SORT_NATURAL | SORT_FLAG_CASE);
+sort($json, SORT_NATURAL | SORT_FLAG_CASE);
 
 // Return the list of thumbnails as a JSON response
-echo json_encode(['thumbnails' => $thumbnails]);
+echo json_encode($json);

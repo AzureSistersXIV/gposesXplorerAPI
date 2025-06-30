@@ -20,6 +20,17 @@ $folderData = array_filter($folderData, function($folder): bool{
     return $folder === (!getQueryParameter("isNsfw") || getQueryParameter("isNsfw") !== "true");
 });
 
+foreach($folderData as $key => $value) {
+    $is_dir = is_dir("../thumbnails/{$key}");
+    if($is_dir){
+        $folder = explorePath("../thumbnails/{$key}");
+        sort($folder);
+        $folderData[$key] = array_key_exists(0, $folder) ? $folder[0] : "./assets/img/folder.png";
+    } else {
+        $folderData[$key] = "../assets/img/folder.png";
+    }
+}
+
 // Sort folders array naturally and case-insensitively
 ksort($folderData, SORT_NATURAL | SORT_FLAG_CASE);
 
