@@ -117,7 +117,7 @@ function getFullPaths(string $screenshot): array
 
         // Create the thumbnail image
         $objThumbImage = new ThumbImage($host . $screenPath);
-        $objThumbImage->createThumb($host . $thumbPath, 250);
+        $objThumbImage->createThumb($host . $thumbPath, 300);
     }
 
     return [$host . $screenPath, $host . $thumbPath];
