@@ -152,7 +152,7 @@ function explorePath(string $path, bool $remove = false): array
             // Get the file extension
             $extension = pathinfo($file, PATHINFO_EXTENSION);
 
-            if (!empty($extension)) {
+            if (!empty($extension) && in_array( strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
                 $explored[] = $path . "/" . $file;
             } else {
                 // If the file has no extension, explore it as a directory
