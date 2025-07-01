@@ -37,8 +37,19 @@ $folders = array_filter(
     }
 );
 
+$foldersData = [];
+foreach ($folders as $key => $folder) {
+    if(is_dir("../thumbnails/{$sourceDir}/{$folder}")) {
+        $thumbnail = explorePath("../thumbnails/{$sourceDir}/{$folder}");
+        sort($thumbnail);
+        $foldersData[$folder] = array_key_exists(0, $thumbnail) ? $thumbnail[0] : "./assets/img/folder.png";
+    } else {
+        $foldersData[$folder] = "../assets/img/folder.png";
+    }
+}
+
 // Sort the folder names in a natural, case-insensitive order
 sort($folders, SORT_NATURAL | SORT_FLAG_CASE);
 
 // Return the list of folders as a JSON response
-echo json_encode(['folders' => $folders]);
+echo json_encode($foldersData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

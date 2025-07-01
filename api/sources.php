@@ -21,8 +21,7 @@ $folderData = array_filter($folderData, function($folder): bool{
 });
 
 foreach($folderData as $key => $value) {
-    $is_dir = is_dir("../thumbnails/{$key}");
-    if($is_dir){
+    if(is_dir("../thumbnails/{$key}")){
         $folder = explorePath("../thumbnails/{$key}");
         sort($folder);
         $folderData[$key] = array_key_exists(0, $folder) ? $folder[0] : "./assets/img/folder.png";
