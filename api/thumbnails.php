@@ -50,7 +50,9 @@ foreach ($screenshots as $screen) {
 }
 
 // Sort the file names in a natural, case-insensitive order
-sort($json, SORT_NATURAL | SORT_FLAG_CASE);
+usort($json, function ($a, $b) {
+    return strnatcasecmp($a[0], $b[0]);
+});
 
 // Return the list of thumbnails as a JSON response
-echo json_encode($json);
+echo json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
