@@ -44,7 +44,7 @@ foreach ($folders as $key => $folder) {
         sort($thumbnail);
         $foldersData[$folder] = array_key_exists(0, $thumbnail) ? $thumbnail[0] : "./assets/img/folder.png";
     } else {
-        $foldersData[$folder] = "../assets/img/folder.png";
+        $foldersData[$folder] = "./assets/img/folder.png";
     }
 }
 
