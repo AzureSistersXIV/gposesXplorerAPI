@@ -211,13 +211,19 @@ function getRelativeFolderPath($file, $folderName, $fileName) {
  * @param string $preview The preview image filename.
  */
 function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder, $preview) {
-    foreach ($orderedFiles as $item) {
+    $folderPath = substr($relativeFolder, 0, -1);
+
+    foreach ($orderedFiles as &$item) {
         if ($item['name'] === $folderName) {
+            // If the new modTime is more recent, update modTime and preview
+            if (strtotime($item['modTime']) < $modTime) {
+                $item['modTime'] = date('Y-m-d H:i:s', $modTime);
+                $item['preview'] = is_dir("../thumbnails/{$folderPath}/{$folderName}") ? "thumbnails/{$folderPath}/{$folderName}/{$preview}" : "./assets/img/folder.png";
+            }
             return;
         }
     }
-
-    $folderPath = substr($relativeFolder, 0, -1);
+    unset($item);
 
     $orderedFiles[] = [
         'name' => $folderName,
