@@ -42,7 +42,12 @@ function getFormParameter(string $arg): mixed
     return false;
 }
 
-// Helper function to scan sources.
+/**
+ * Scan the screenshots directory and return all sources (folders and subfolders).
+ *
+ * @param string $screenshotsDir The path to the screenshots directory.
+ * @return array List of folder paths (e.g., "mainfolder/subfolder" or "mainfolder").
+ */
 function getSources(string $screenshotsDir): array {
     // Get all directories in the screenshots directory, excluding '.' and '..'
     $mainFolders = array_filter(
@@ -79,6 +84,13 @@ function getSources(string $screenshotsDir): array {
     return $resultFolders;
 }
 
+/**
+ * Get the full paths for a screenshot and its thumbnail, creating the thumbnail if needed.
+ *
+ * @param string $screenshot The relative path to the screenshot.
+ * @return array Array with [screenshot path, thumbnail path].
+ * @throws Exception If the screenshot does not exist.
+ */
 function getFullPaths(string $screenshot): array
 {
     // Set error reporting settings
@@ -90,13 +102,13 @@ function getFullPaths(string $screenshot): array
     $screenPath = $screenshot;
     $thumbPath = str_replace("screenshots/", "thumbnails/", $screenshot);
 
-    
+    // Check if the screenshot file exists
     if (!file_exists("../" . $screenPath)) {
         throw new Exception(`Artwork link not found: {$screenPath}`);
     }
 
     $dirPath = "";
-    // Split the thumbnail path into directories
+    // Split the thumbnail path into directories and create them if needed
     $words = explode("/", "../" . $thumbPath);
     foreach ($words as $key => $word) {
         $dirPath .= $word . ($key < count($words) - 1 ? "/" : "");
@@ -106,7 +118,7 @@ function getFullPaths(string $screenshot): array
         }
     }
 
-    // Check if the thumbnail file exists
+    // Check if the thumbnail file exists, create it if not
     if (!file_exists("../" . $thumbPath)) {
         // Create the directory for the thumbnail if it does not exist
         $temp = explode("/", $thumbPath);
@@ -123,6 +135,15 @@ function getFullPaths(string $screenshot): array
     return [$host . $screenPath, $host . $thumbPath];
 }
 
+/**
+ * Recursively explore a directory and return all image files.
+ * Optionally remove unwanted files/directories.
+ *
+ * @param string $path The directory path to explore.
+ * @param bool $remove Whether to remove unwanted files/directories.
+ * @return array List of image file paths.
+ * @throws Exception If the path is not a directory.
+ */
 function explorePath(string $path, bool $remove = false): array
 {
     if (!is_dir($path)) {
@@ -153,6 +174,7 @@ function explorePath(string $path, bool $remove = false): array
             $extension = pathinfo($file, PATHINFO_EXTENSION);
 
             if (!empty($extension) && in_array( strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
+                // If it's an image file, add to the result
                 $explored[] = $path . "/" . $file;
             } else {
                 // If the file has no extension, explore it as a directory
@@ -165,13 +187,29 @@ function explorePath(string $path, bool $remove = false): array
     return $explored;
 }
 
-// Helper: get relative folder path from file path
+/**
+ * Get the relative folder path from a file path.
+ *
+ * @param string $file The full file path.
+ * @param string $folderName The folder name.
+ * @param string $fileName The file name.
+ * @return string The relative folder path.
+ */
 function getRelativeFolderPath($file, $folderName, $fileName) {
     // 15 = strlen("../screenshots/")
     return substr($file, 15, -strlen($folderName . '/' . $fileName));
 }
 
-// Helper: add folder info to $orderedFiles if not already present
+/**
+ * Add folder info to $orderedFiles if not already present.
+ * Includes preview image if available.
+ *
+ * @param array &$orderedFiles The array to add to.
+ * @param string $folderName The folder name.
+ * @param int $modTime The modification time.
+ * @param string $relativeFolder The relative folder path.
+ * @param string $preview The preview image filename.
+ */
 function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder, $preview) {
     foreach ($orderedFiles as $item) {
         if ($item['name'] === $folderName) {
@@ -185,11 +223,19 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
         'name' => $folderName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
         'folder' => $folderPath,
-        'preview' => "thumbnails/{$folderPath}/{$folderName}/{$preview}"
+        // Use folder preview if exists, otherwise fallback to default image
+        'preview' => is_dir("../thumbnails/{$folderPath}/{$folderName}") ? "thumbnails/{$folderPath}/{$folderName}/{$preview}" : "./assets/img/folder.png"
     ];
 }
 
-// Helper: add file info to $orderedFiles
+/**
+ * Add file info to $orderedFiles.
+ *
+ * @param array &$orderedFiles The array to add to.
+ * @param string $fileName The file name.
+ * @param int $modTime The modification time.
+ * @param string $relativeFolder The relative folder path.
+ */
 function addFile(&$orderedFiles, $fileName, $modTime, $relativeFolder) {
     $orderedFiles[] = [
         'name' => $fileName,
