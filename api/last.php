@@ -39,7 +39,7 @@ foreach ($folderData as $folderKey => $isNsfw) {
 
         if ($groupByFolder) {
             $relativeFolder = getRelativeFolderPath($file, $folderName, $fileName);
-            addFolderIfNotExists($orderedFiles, $folderName, $modTime, $relativeFolder);
+            addFolderIfNotExists($orderedFiles, $folderName, $modTime, $relativeFolder, basename($file));
         } else {
             // 15 = strlen("../screenshots/")
             $relativeFolder = substr($file, 15, -strlen('/' . $fileName));

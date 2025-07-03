@@ -172,7 +172,7 @@ function getRelativeFolderPath($file, $folderName, $fileName) {
 }
 
 // Helper: add folder info to $orderedFiles if not already present
-function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder) {
+function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder, $preview) {
     foreach ($orderedFiles as $item) {
         if ($item['name'] === $folderName) {
             return;
@@ -181,7 +181,8 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
     $orderedFiles[] = [
         'name' => $folderName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
-        'folder' => substr($relativeFolder, 0, -1) // Remove trailing slash,
+        'folder' => substr($relativeFolder, 0, -1), // Remove trailing slash,
+        'preview' => $preview
     ];
 }
 
