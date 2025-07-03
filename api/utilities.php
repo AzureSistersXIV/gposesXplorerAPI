@@ -178,11 +178,14 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
             return;
         }
     }
+
+    $folderPath = substr($relativeFolder, 0, -1);
+
     $orderedFiles[] = [
         'name' => $folderName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
-        'folder' => substr($relativeFolder, 0, -1), // Remove trailing slash,
-        'preview' => $preview
+        'folder' => $folderPath,
+        'preview' => "thumbnails/{$folderPath}/{$folderName}/{$preview}"
     ];
 }
 
