@@ -164,3 +164,32 @@ function explorePath(string $path, bool $remove = false): array
 
     return $explored;
 }
+
+// Helper: get relative folder path from file path
+function getRelativeFolderPath($file, $folderName, $fileName) {
+    // 15 = strlen("../screenshots/")
+    return substr($file, 15, -strlen($folderName . '/' . $fileName));
+}
+
+// Helper: add folder info to $orderedFiles if not already present
+function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder) {
+    foreach ($orderedFiles as $item) {
+        if ($item['name'] === $folderName) {
+            return;
+        }
+    }
+    $orderedFiles[] = [
+        'name' => $folderName,
+        'modTime' => date('Y-m-d H:i:s', $modTime),
+        'folder' => substr($relativeFolder, 0, -1) // Remove trailing slash,
+    ];
+}
+
+// Helper: add file info to $orderedFiles
+function addFile(&$orderedFiles, $fileName, $modTime, $relativeFolder) {
+    $orderedFiles[] = [
+        'name' => $fileName,
+        'modTime' => date('Y-m-d H:i:s', $modTime),
+        'folder' => $relativeFolder,
+    ];
+}
