@@ -303,9 +303,7 @@ function createZip($dirPath, $zipPath, $zipFullPath)
     }
 
     // Close the zip archive to finalize it
-    $zip->close();
-
-    return true;
+    return $zip->close();
 }
 
 function updateZipIfNeeded($dirPath, $zipPath, $zipFullPath)
@@ -335,6 +333,8 @@ function updateZipIfNeeded($dirPath, $zipPath, $zipFullPath)
         if ($zip->numFiles != count($filesToZip)) {
             unlink($zipFullPath);
             return createZip($dirPath, $zipPath, $zipFullPath);
+        }else{
+            return true;
         }
 
     } else {

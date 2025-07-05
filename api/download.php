@@ -23,9 +23,16 @@ $zipPath = "../share/" . implode('/', $pathArray);
 $zipFullPath = "{$zipPath}/{$zipName}";
 
 if (file_exists($zipFullPath)) {
+
+    if(in_array(end(explode('/', $sourceDir)), ["1.SFW", "2.NSFW"])){
+        $filename = explode('/', $sourceDir)[0] . ".zip";
+    }else{
+        $filename = $zipName;
+    }
+
     header('Content-Description: File Transfer');
     header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename="gposesXplorer_'.basename($zipFullPath).'"');
+    header('Content-Disposition: attachment; filename="gposesXplorer_'.basename(urlencode($filename)).'"');
     header('Expires: 0');
     header('Cache-Control: must-revalidate');
     header('Pragma: public');
