@@ -1,10 +1,5 @@
 <?php
 
-// Set CORS headers to allow cross-origin requests and specify content type
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
-header('Content-Type: application/json; charset=utf-8');
-
 // Include utility functions (e.g., for getting query parameters)
 require_once "./utilities.php";
 
@@ -27,5 +22,14 @@ $dirPath = "../screenshots/{$sourceDir}";
 $zipPath = "../share/" . implode('/', $pathArray);
 $zipFullPath = "{$zipPath}/{$zipName}";
 
-$success = !file_exists($zipFullPath) ? createZip($dirPath, $zipPath, $zipFullPath) : $success = updateZipIfNeeded($dirPath, $zipPath, $zipFullPath);
-echo json_encode(["success" => $success]);
+if (file_exists($zipFullPath)) {
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="gposesXplorer_'.basename($zipFullPath).'"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize($zipFullPath));
+    readfile($zipFullPath);
+    exit;
+}

@@ -277,7 +277,7 @@ function createZip($dirPath, $zipPath, $zipFullPath)
     // Attempt to open (create/overwrite) the zip file; return 500 error if it fails
     if ($zip->open($zipFullPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
         http_response_code(500);
-        echo json_encode(['error' => "Cannot create zip at $zipFullPath"]);
+        echo json_encode(['error' => "Cannot create ZIP at $zipFullPath"]);
         exit;
     }
 
@@ -304,4 +304,42 @@ function createZip($dirPath, $zipPath, $zipFullPath)
 
     // Close the zip archive to finalize it
     $zip->close();
+
+    return true;
+}
+
+function updateZipIfNeeded($dirPath, $zipPath, $zipFullPath)
+{
+
+    if (!file_exists($zipFullPath)) {
+        http_response_code(404);
+        echo json_encode(['error' => 'No ZIP file found.']);
+        exit;
+    }
+
+    $zip = new ZipArchive();
+
+    if ($zip->open($zipFullPath) === TRUE) {
+
+        // Get a list of files in the source directory
+        $files = scandir($dirPath);
+
+        $filesToZip = array_filter($files, function ($file) {
+            // Define the allowed image file extensions to include in the zip
+            $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+            // Get the file extension and check if it's an allowed image type
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            return $file != "." && $file != ".." && in_array($extension, $imageExtensions);
+        });
+
+        if ($zip->numFiles != count($filesToZip)) {
+            unlink($zipFullPath);
+            return createZip($dirPath, $zipPath, $zipFullPath);
+        }
+
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to open ZIP file.']);
+        exit;
+    }
 }
