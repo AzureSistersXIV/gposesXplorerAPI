@@ -48,7 +48,8 @@ function getFormParameter(string $arg): mixed
  * @param string $screenshotsDir The path to the screenshots directory.
  * @return array List of folder paths (e.g., "mainfolder/subfolder" or "mainfolder").
  */
-function getSources(string $screenshotsDir): array {
+function getSources(string $screenshotsDir): array
+{
     // Get all directories in the screenshots directory, excluding '.' and '..'
     $mainFolders = array_filter(
         scandir($screenshotsDir),
@@ -173,7 +174,7 @@ function explorePath(string $path, bool $remove = false): array
             // Get the file extension
             $extension = pathinfo($file, PATHINFO_EXTENSION);
 
-            if (!empty($extension) && in_array( strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
+            if (!empty($extension) && in_array(strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
                 // If it's an image file, add to the result
                 $explored[] = $path . "/" . $file;
             } else {
@@ -195,7 +196,8 @@ function explorePath(string $path, bool $remove = false): array
  * @param string $fileName The file name.
  * @return string The relative folder path.
  */
-function getRelativeFolderPath($file, $folderName, $fileName) {
+function getRelativeFolderPath($file, $folderName, $fileName)
+{
     // 15 = strlen("../screenshots/")
     return substr($file, 15, -strlen($folderName . '/' . $fileName));
 }
@@ -210,7 +212,8 @@ function getRelativeFolderPath($file, $folderName, $fileName) {
  * @param string $relativeFolder The relative folder path.
  * @param string $preview The preview image filename.
  */
-function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder, $preview) {
+function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFolder, $preview)
+{
     $folderPath = substr($relativeFolder, 0, -1);
 
     foreach ($orderedFiles as &$item) {
@@ -242,10 +245,63 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
  * @param int $modTime The modification time.
  * @param string $relativeFolder The relative folder path.
  */
-function addFile(&$orderedFiles, $fileName, $modTime, $relativeFolder) {
+function addFile(&$orderedFiles, $fileName, $modTime, $relativeFolder)
+{
     $orderedFiles[] = [
         'name' => $fileName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
         'folder' => $relativeFolder,
     ];
+}
+
+function createZip($dirPath, $zipPath, $zipFullPath)
+{
+    // Check if the source directory exists; if not, return a 404 error
+    if (!is_dir($dirPath)) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Directory not found.']);
+        exit;
+    }
+
+    // Ensure the output directory for the zip file exists; create it if it doesn't
+    if (!is_dir($zipPath)) {
+        mkdir($zipPath, 0777, true);
+    }
+
+    // Define the allowed image file extensions to include in the zip
+    $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+
+    // Create a new ZipArchive instance
+    $zip = new ZipArchive();
+
+    // Attempt to open (create/overwrite) the zip file; return 500 error if it fails
+    if ($zip->open($zipFullPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        http_response_code(500);
+        echo json_encode(['error' => "Cannot create zip at $zipFullPath"]);
+        exit;
+    }
+
+    // Get a list of files in the source directory
+    $files = scandir($dirPath);
+
+    // Loop through each file in the directory
+    foreach ($files as $file) {
+        $filePath = $dirPath . DIRECTORY_SEPARATOR . $file;
+
+        // Skip directories (only process files)
+        if (is_dir($filePath)) {
+            continue;
+        }
+
+        // Get the file extension and check if it's an allowed image type
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+        if (in_array($extension, $imageExtensions)) {
+            // Add the image file to the zip archive
+            $zip->addFile($filePath, $file);
+        }
+    }
+
+    // Close the zip archive to finalize it
+    $zip->close();
 }
