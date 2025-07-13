@@ -26,7 +26,7 @@ foreach($folderData as $key => $value) {
         sort($folder);
         $folderData[$key] = array_key_exists(0, $folder) ? $folder[0] : "./assets/img/folder.png";
     } else {
-        $folderData[$key] = "../assets/img/folder.png";
+        $folderData[$key] = "./assets/img/folder.png";
     }
 }
 
