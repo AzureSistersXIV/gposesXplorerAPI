@@ -216,8 +216,10 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
 {
     $folderPath = substr($relativeFolder, 0, -1);
 
+    $tempName = (!in_array($folderName, ['1.SFW', '2.NSFW'])) ? $folderName : basename($folderPath);
+
     foreach ($orderedFiles as &$item) {
-        if ($item['name'] === $folderName) {
+        if ($item['name'] === $tempName) {
             // If the new modTime is more recent, update modTime and preview
             if (strtotime($item['modTime']) < $modTime) {
                 $item['modTime'] = date('Y-m-d H:i:s', $modTime);
@@ -229,7 +231,7 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
     unset($item);
 
     $orderedFiles[] = [
-        'name' => $folderName,
+        'name' => $tempName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
         'folder' => $folderPath,
         // Use folder preview if exists, otherwise fallback to default image
