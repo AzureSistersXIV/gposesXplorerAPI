@@ -233,7 +233,7 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
     $orderedFiles[] = [
         'name' => $tempName,
         'modTime' => date('Y-m-d H:i:s', $modTime),
-        'folder' => $folderPath,
+        'folder' => $folderPath === $tempName ? "{$folderPath}/{$folderName}" : $folderPath,
         // Use folder preview if exists, otherwise fallback to default image
         'preview' => is_dir("../thumbnails/{$folderPath}/{$folderName}") ? "thumbnails/{$folderPath}/{$folderName}/{$preview}" : "./assets/img/folder.png"
     ];
