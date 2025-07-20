@@ -174,9 +174,11 @@ function explorePath(string $path, bool $remove = false): array
             // Get the file extension
             $extension = pathinfo($file, PATHINFO_EXTENSION);
 
-            if (!empty($extension) && in_array(strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
-                // If it's an image file, add to the result
-                $explored[] = $path . "/" . $file;
+            if (!empty($extension)) {
+                if (in_array(strtolower($extension), ["png", "jpg", "jpeg", "gif", "webp", "bmp"])) {
+                    // If it's an image file, add to the result
+                    $explored[] = $path . "/" . $file;
+                }
             } else {
                 // If the file has no extension, explore it as a directory
                 unset($files[$key]);
@@ -298,7 +300,7 @@ function createZip($dirPath, $zipPath, $zipFullPath)
         // Get the file extension and check if it's an allowed image type
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-        if (in_array($extension, $imageExtensions)) {
+        if (in_array(strtolower($extension), $imageExtensions)) {
             // Add the image file to the zip archive
             $zip->addFile($filePath, $file);
         }
@@ -335,7 +337,7 @@ function updateZipIfNeeded($dirPath, $zipPath, $zipFullPath)
         if ($zip->numFiles != count($filesToZip)) {
             unlink($zipFullPath);
             return createZip($dirPath, $zipPath, $zipFullPath);
-        }else{
+        } else {
             return true;
         }
 

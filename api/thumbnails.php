@@ -31,8 +31,12 @@ if (!is_dir($dirPath)) {
 $screenshots = array_filter(
     scandir($dirPath),
     function ($screenshot) use ($dirPath) {
+        // Define the allowed image file extensions to include in the zip
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        // Get the file extension and check if it's an allowed image type
+        $extension = strtolower(pathinfo("{$dirPath}/{$screenshot}", flags: PATHINFO_EXTENSION));
         // Only include files, skip '.' and '..'
-        return $screenshot !== '.' && $screenshot !== '..' && !is_dir("{$dirPath}/{$screenshot}");
+        return $screenshot !== '.' && $screenshot !== '..' && !is_dir("{$dirPath}/{$screenshot}") && in_array($extension, $imageExtensions);
     }
 );
 
