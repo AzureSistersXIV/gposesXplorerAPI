@@ -221,7 +221,7 @@ function addFolderIfNotExists(&$orderedFiles, $folderName, $modTime, $relativeFo
     $tempName = (!in_array($folderName, ['1.SFW', '2.NSFW'])) ? $folderName : basename($folderPath);
 
     foreach ($orderedFiles as &$item) {
-        if ($item['name'] === $tempName) {
+        if ($item['name'] === $tempName && $item['folder'] === $folderPath) {
             // If the new modTime is more recent, update modTime and preview
             if (strtotime($item['modTime']) < $modTime) {
                 $item['modTime'] = date('Y-m-d H:i:s', $modTime);
